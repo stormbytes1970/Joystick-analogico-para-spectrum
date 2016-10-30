@@ -17,8 +17,6 @@
 
 #define deadband 75
 
-#define c_autofire 250 //cadencia de disparo 250ms
-unsigned long 
 int lim_inf=511-deadband;
 int lim_sup=511+deadband;
 
