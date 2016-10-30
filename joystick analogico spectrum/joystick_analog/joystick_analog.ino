@@ -1,3 +1,4 @@
+//Joystick analogico para spectrum
 #define arriba 2
 #define abajo 3
 #define izquierda 4
@@ -13,19 +14,27 @@
 #define joy_x 0
 #define joy_y 1
 
-#define deadband 61
+#define deadband 75
 
 int lim_inf=511-deadband;
 int lim_sup=511+deadband;
 
-void setup() {
-  pinMode(arriba,OUTPUT);
-  pinMode(abajo,OUTPUT);
-  pinMode(izquierda,OUTPUT);
-  pinMode(derecha,OUTPUT);
-  pinMode(f1,OUTPUT);
-  pinMode(f2,OUTPUT);
-  pinMode(f3,OUTPUT); 
+void setup() {  //las salidas se programan como entradas para simular colector abierto
+  pinMode(arriba,INPUT);
+  pinMode(abajo,INPUT);
+  pinMode(izquierda,INPUT);
+  pinMode(derecha,INPUT);
+  pinMode(f1,INPUT);
+  pinMode(f2,INPUT);
+  pinMode(f3,INPUT); 
+
+  digitalWrite(arriba, LOW); //inicializar salidas latch a cero para activar el pin de direccion que sera cambiado a la salida
+  digitalWrite(abajo, LOW);
+  digitalWrite(izquierda, LOW);
+  digitalWrite(derecha, LOW);
+  digitalWrite(f1, LOW);
+  digitalWrite(f2, LOW);
+  digitalWrite(f3, LOW);
 
   pinMode(0,INPUT);
   pinMode(1,INPUT); 
@@ -36,42 +45,42 @@ void setup() {
 }
 
 void loop() {
-  if(!digitalRead(boton1)) {digitalWrite(f1,LOW);}
-  else {digitalWrite(f1,HIGH);}
+  if(!digitalRead(boton1)) {pinMode(f1,OUTPUT);}
+  else {pinMode(f1,INPUT);}
 
-  if(!digitalRead(boton2)) {digitalWrite(f2,LOW);}
-  else {digitalWrite(f2,HIGH);}
+  if(!digitalRead(boton2)) {pinMode(f2,OUTPUT);}
+  else {pinMode(f2,INPUT);}
 
-  if(!digitalRead(boton3)) {digitalWrite(f3,LOW);}
-  else {digitalWrite(f3,HIGH);}
+  if(!digitalRead(boton3)) {pinMode(f3,OUTPUT);}
+  else {pinMode(f3,INPUT);}
 
   int v=analogRead(joy_x);
 
   if (v<lim_inf){
-    digitalWrite(izquierda,LOW);
-    digitalWrite(derecha,HIGH);
+    pinMode(izquierda,OUTPUT);
+    pinMode(derecha,INPUT);
   }
   if ((v>(lim_inf+1))&&(v<(lim_sup-1))){
-    digitalWrite(izquierda,HIGH);
-    digitalWrite(derecha,HIGH);
+    pinMode(izquierda,INPUT);
+    pinMode(derecha,INPUT);
   }
   if (v>lim_sup){
-    digitalWrite(izquierda,HIGH);
-    digitalWrite(derecha,LOW);
+    pinMode(izquierda,INPUT);
+    pinMode(derecha,OUTPUT);
   }
 
   v=analogRead(joy_y);
 
   if (v<lim_inf){
-    digitalWrite(arriba,LOW);
-    digitalWrite(abajo,HIGH);
+    pinMode(arriba,OUTPUT);
+    pinMode(abajo,INPUT);
   }
   if ((v>(lim_inf+1))&&(v<(lim_sup-1))){
-    digitalWrite(arriba,HIGH);
-    digitalWrite(abajo,HIGH);
+    pinMode(arriba,INPUT);
+    pinMode(abajo,INPUT);
   }
   if (v>lim_sup){
-    digitalWrite(arriba,HIGH);
-    digitalWrite(abajo,LOW);
+    pinMode(arriba,INPUT);
+    pinMode(abajo,OUTPUT);
   }
 }
