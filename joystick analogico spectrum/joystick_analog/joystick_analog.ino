@@ -1,21 +1,26 @@
 //Joystick analogico para spectrum
 //Stormbytes 2016
 
-#define arriba 2
-#define abajo 3
-#define izquierda 4
-#define derecha 5
-#define f1 6
-#define f2 7
-#define f3 8
+//salidas para el interface kempston
+#define arriba 2  //D2
+#define abajo 3   //D3
+#define izquierda 4 //D4
+#define derecha 5 //D5
+#define f1 6  //D6
+#define f2 7 //D7
+#define f3 8 //D8
 
-#define boton1 9  //no usa autofire
-#define boton2 10 //autofire nivel 1
-#define boton3 11 //autofire nivel 2
-#define boton4 12 //autofire nivel 3
+// botones 1,2,3,4 mapeados a la salida f1
+#define boton1 9  //sin autofire D9
+#define boton2 10 //autofire nivel 1 D10
+#define boton3 11 //autofire nivel 2  D11
+#define boton4 12 //autofire nivel 3  D12
+//botones sin autofire:
+#define fire2 0 //mapeado a f2  (TX)
+#define fire3 1 //mapeado a f3  (RX)
 
-#define joy_x 0 //entrada joystick analogico X izquierdo
-#define joy_y 1 //entrada joystick analogico Y izquierdo
+#define joy_x 0 //entrada joystick analogico X izquierdo A0
+#define joy_y 1 //entrada joystick analogico Y izquierdo  A1
 
 #define deadband 75 //valor de punto muerto para los ejes (ajusta sensibilidad)
 
@@ -30,7 +35,10 @@ void setup() {  //las salidas se programan como entradas para simular colector a
   pinMode(f1,INPUT);
   pinMode(f2,INPUT);
   pinMode(f3,INPUT); 
-
+  
+  pinMode(fire2,INPUT); //boton fire 2
+  pinMode(fire3,INPUT); //boton fire 3 
+  
   digitalWrite(arriba, LOW); //inicializar salidas latch a cero para activar el pin de direccion que sera cambiado a la salida
   digitalWrite(abajo, LOW);
   digitalWrite(izquierda, LOW);
@@ -39,8 +47,6 @@ void setup() {  //las salidas se programan como entradas para simular colector a
   digitalWrite(f2, LOW);
   digitalWrite(f3, LOW);
 
-  pinMode(0,INPUT);
-  pinMode(1,INPUT); 
   
   pinMode(boton1,INPUT_PULLUP);
   pinMode(boton2,INPUT_PULLUP);
@@ -55,7 +61,12 @@ void setup() {  //las salidas se programan como entradas para simular colector a
 }
 
 void loop() {
-
+  
+  if(!digitalRead(fire2)) {pinMode(f2,OUTPUT);} //fire2 (fire2 y fire3 no tienen autofire)
+    else{pinMode(f2,INPUT);}
+  if(!digitalRead(fire3)) {pinMode(f3,OUTPUT);} //fire3
+     else{pinMode(f3,INPUT);}
+     
   int v=analogRead(joy_x);
 
   if (v<lim_inf){
@@ -117,7 +128,7 @@ ISR(TIMER1_COMPA_vect)
     
     //comprobar si se pulsan los botones de disparo:
     if(!digitalRead(boton1)) {pinMode(f1,OUTPUT);} //el boton 1 actua sin autofire
-
+     
     if(!digitalRead(boton2)) {
        pinMode (f1, state_b2 ? OUTPUT : INPUT);
     }
