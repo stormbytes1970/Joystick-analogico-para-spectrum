@@ -1,4 +1,6 @@
 //Joystick analogico para spectrum
+//Stormbytes 2016
+
 #define arriba 2
 #define abajo 3
 #define izquierda 4
@@ -7,15 +9,15 @@
 #define f2 7
 #define f3 8
 
-#define boton1 9
-#define boton2 10
-#define boton3 11
-#define boton4 12
+#define boton1 9  //no usa autofire
+#define boton2 10 //autofire nivel 1
+#define boton3 11 //autofire nivel 2
+#define boton4 12 //autofire nivel 3
 
-#define joy_x 0
-#define joy_y 1
+#define joy_x 0 //entrada joystick analogico X izquierdo
+#define joy_y 1 //entrada joystick analogico Y izquierdo
 
-#define deadband 75
+#define deadband 75 //valor de punto muerto para los ejes (ajusta sensibilidad)
 
 int lim_inf=511-deadband;
 int lim_sup=511+deadband;
@@ -45,22 +47,14 @@ void setup() {  //las salidas se programan como entradas para simular colector a
   pinMode(boton3,INPUT_PULLUP);
   pinMode(boton4,INPUT_PULLUP);
 
-  // set up Timer 1
+  // configurar el timer 1 para interrupcion por comparacion
   TCCR1A = 0;          // normal operation
-  TCCR1B = bit(WGM12) | bit(CS10) | bit (CS12);   // CTC, scale to clock / 1024
-  OCR1A =  999;       // compare A register value (1000 * clock speed / 1024)
-  TIMSK1 = bit (OCIE1A);             // interrupt on Compare A Match
+  TCCR1B = bit(WGM12) | bit(CS10) | bit (CS12);   // CTC, scale to clock / 1024 entrada timer=f_reloj/1024(preescaler)
+  OCR1A =  999;       // compare A register value (1000 * clock speed / 1024) valor a comparar
+  TIMSK1 = bit (OCIE1A);             // interrupt on Compare A Match  interrupcion al igualar
 }
 
 void loop() {
-  if(!digitalRead(boton1)) {pinMode(f1,OUTPUT);}
-  else {pinMode(f1,INPUT);}
-
-//  if(!digitalRead(boton2)) {pinMode(f2,OUTPUT);}
-//  else {pinMode(f2,INPUT);}
-
-//  if(!digitalRead(boton3)) {pinMode(f3,OUTPUT);}
-//  else {pinMode(f3,INPUT);}
 
   int v=analogRead(joy_x);
 
@@ -91,16 +85,22 @@ void loop() {
     pinMode(arriba,INPUT);
     pinMode(abajo,OUTPUT);
   }
+
 }
+
+
+//rutina servicio de interrupcion al timer 1
 //gestion temporizadores de autodisparo
 ISR(TIMER1_COMPA_vect)
 {
+    //variables estaticas para almacenar el estado del autofire de los distintos botones:
     static boolean state_b2 = false; //estado salidas de los autofires
     static boolean state_b3 = false;
     static boolean state_b4 = false;
     static byte cont_b3 = 0;//contadores para la division de autofire
     static byte cont_b4 = 0;
-
+    
+    //calcular y actualizar el estado de las distintas salidas:
     state_b2 = !state_b2;  // toggle valor de b2 (no necesita division)
     
     cont_b3++;
@@ -114,21 +114,24 @@ ISR(TIMER1_COMPA_vect)
       cont_b4=0;
       state_b4=!state_b4;
     }
+    
+    //comprobar si se pulsan los botones de disparo:
+    if(!digitalRead(boton1)) {pinMode(f1,OUTPUT);} //el boton 1 actua sin autofire
 
     if(!digitalRead(boton2)) {
-       pinMode (f2, state_b2 ? OUTPUT : INPUT);
+       pinMode (f1, state_b2 ? OUTPUT : INPUT);
     }
 
     if(!digitalRead(boton3)) {
-       pinMode (f2, state_b3 ? OUTPUT : INPUT);
+       pinMode (f1, state_b3 ? OUTPUT : INPUT);
     }
 
     if(!digitalRead(boton4)) {
-       pinMode (f2, state_b4 ? OUTPUT : INPUT);
+       pinMode (f1, state_b4 ? OUTPUT : INPUT);
     }
-
-    if (digitalRead(boton4) & digitalRead(boton3) & digitalRead(boton2)){
-      pinMode (f2, INPUT);
+    // de no haber ningun boton pulsador desactivamos la salida inmediatamente:
+    if (digitalRead(boton4) & digitalRead(boton3) & digitalRead(boton2) & digitalRead(boton1)){
+      pinMode (f1, INPUT);
     }
 }
 
